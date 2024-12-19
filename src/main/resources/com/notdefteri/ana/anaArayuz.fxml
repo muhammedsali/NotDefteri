@@ -6,50 +6,45 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
-<VBox alignment="TOP_CENTER" prefHeight="673.0" prefWidth="436.0" spacing="10" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.notdefteri.arayuz.AnaArayuzKontrol">
-    <Label text="Kişisel Not Defteri" textAlignment="CENTER">
-      <font>
-         <Font size="23.0" />
-      </font></Label>
-    <GridPane alignment="CENTER_LEFT" hgap="10" vgap="10">
-        <Label text="Başlık" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-        <TextField fx:id="baslik" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-        <Label text="İçerik" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-        <TextField fx:id="icerik" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-        <Label text="Kategori" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-        <ComboBox fx:id="kategori" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        <Label text="Etiketler" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-        <TextField fx:id="etiketler" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-        <Label text="Hatırlatma Tarihi" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-        <DatePicker fx:id="hatirlatmaTarihi" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-        <Button onAction="#notuKaydet" text="Kaydet" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-      <columnConstraints>
-         <ColumnConstraints />
-         <ColumnConstraints />
-      </columnConstraints>
-      <rowConstraints>
-         <RowConstraints />
-         <RowConstraints />
-         <RowConstraints />
-         <RowConstraints />
-         <RowConstraints />
-         <RowConstraints />
-      </rowConstraints>
-    </GridPane>
-    <TextField fx:id="aramaAlani" promptText="Notları Ara" />
-    <TableView fx:id="notTablosu" onMouseClicked="#notDetaylariniGoster">
-        <columns>
-            <TableColumn fx:id="baslikKolonu" text="Başlık" />
-            <TableColumn fx:id="icerikKolonu" text="İçerik" />
-            <TableColumn fx:id="kategoriKolonu" text="Kategori" />
-            <TableColumn fx:id="hatirlatmaTarihiKolonu" text="Hatırlatma Tarihi" />
-        </columns>
-    </TableView>
-</VBox>
+<AnchorPane prefHeight="508.0" prefWidth="868.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="com.notdefteri.arayuz.AnaArayuzKontrol">
+    <children>
+        <VBox layoutX="20" layoutY="72.0" prefHeight="493.0" prefWidth="282.0" spacing="10">
+            <TextField fx:id="baslik" prefHeight="5.0" prefWidth="273.0" promptText="Başlık" />
+            <TextArea fx:id="icerik" prefHeight="62.0" prefWidth="286.0" promptText="İçerik" />
+            <ComboBox fx:id="kategori" promptText="Kategori" />
+            <TextField fx:id="etiketler" promptText="Etiketler" />
+            <DatePicker fx:id="hatirlatmaTarihi" promptText="Hatırlatma Tarihi" />
+            <Button onAction="#resimYukle" text="Resim Yükle" />
+            <ImageView fx:id="resimGoruntuleyici" fitHeight="113.0" fitWidth="285.0" />
+            <HBox spacing="10">
+                <Button alignment="CENTER" contentDisplay="CENTER" nodeOrientation="LEFT_TO_RIGHT" onAction="#notuKaydet" prefHeight="9.0" prefWidth="140.0" text="Kaydet" textAlignment="CENTER" />
+            </HBox>
+            <!-- Bilgilendirme Mesajı -->
+            <Label fx:id="bilgilendirmeMesaji" style="-fx-text-fill: green;" text="" />
+        </VBox>
+        <TableView fx:id="notTablosu" layoutX="322.0" layoutY="71.0" nodeOrientation="LEFT_TO_RIGHT" onMouseClicked="#notDetaylariniGoster" prefHeight="406.0" prefWidth="515.0">
+            <columns>
+                <TableColumn fx:id="baslikKolonu" text="Başlık" />
+                <TableColumn fx:id="icerikKolonu" text="İçerik" />
+                <TableColumn fx:id="kategoriKolonu" text="Kategori" />
+                <TableColumn fx:id="hatirlatmaTarihiKolonu" text="Hatırlatma Tarihi" />
+                <TableColumn fx:id="resimKolonu" text="Resim" />
+            </columns>
+        </TableView>
+        <TextField fx:id="aramaAlani" layoutX="648.0" layoutY="36.0" prefHeight="26.0" prefWidth="186.0" promptText="Ara..." />
+      <Text layoutX="20.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Not Defteri" textAlignment="CENTER">
+         <font>
+            <Font size="27.0" />
+         </font>
+      </Text>
+    </children>
+</AnchorPane>

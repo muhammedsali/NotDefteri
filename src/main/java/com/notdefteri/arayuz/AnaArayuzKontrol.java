@@ -1,34 +1,38 @@
 package com.notdefteri.arayuz;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import java.io.ByteArrayInputStream;
+import java.nio.file.Files;
+import com.notdefteri.model.GorselNot;
 import com.notdefteri.model.Not;
 import com.notdefteri.model.NotDAO;
 import com.notdefteri.tasarimdesenleri.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.beans.value.ObservableValue;
-import javafx.beans.value.ChangeListener;
-import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.util.Callback;
+import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.stream.Collectors;
-
 public class AnaArayuzKontrol {
     @FXML
     private TextField baslik;
     @FXML
-    private TextField icerik;
+    private TableColumn<Not, ImageView> resimKolonu;
+    @FXML
+    private TextArea icerik;
     @FXML
     private ComboBox<String> kategori;
     @FXML
@@ -37,6 +41,8 @@ public class AnaArayuzKontrol {
     private TextField aramaAlani;
     @FXML
     private DatePicker hatirlatmaTarihi;
+    @FXML
+    private ImageView resimGoruntuleyici;
     @FXML
     private TableView<Not> notTablosu;
     @FXML
@@ -52,6 +58,7 @@ public class AnaArayuzKontrol {
     private ObservableList<Not> notlar;
     private NotFabrikasi notFabrikasi;
     private NotDurumYonetici durumYonetici;
+    private File yuklenenResim;
 
     public AnaArayuzKontrol() {
         this.notDAO = new NotDAO();
@@ -59,9 +66,13 @@ public class AnaArayuzKontrol {
         this.durumYonetici = new NotDurumYonetici();
     }
 
+
+
+
+
     @FXML
     private void initialize() {
-        kategori.setItems(FXCollections.observableArrayList("Metin", "Görsel", "Diğer"));
+        kategori.setItems(FXCollections.observableArrayList("Kişisel Notlar", "İş ve Projeler", "Eğitim","Alışveriş"));
         notTablosu.setItems(notlar);
 
         baslikKolonu.setCellValueFactory(cellData -> cellData.getValue().baslikProperty());
@@ -69,17 +80,33 @@ public class AnaArayuzKontrol {
         kategoriKolonu.setCellValueFactory(cellData -> cellData.getValue().kategoriProperty());
         hatirlatmaTarihiKolonu.setCellValueFactory(cellData -> cellData.getValue().hatirlatmaTarihiProperty());
 
+        resimKolonu.setCellValueFactory(cellData -> {
+            Not not = cellData.getValue();
+            if (not instanceof GorselNot) {
+                GorselNot gorselNot = (GorselNot) not;
+                byte[] resimVerisi = gorselNot.getResim();
+                if (resimVerisi != null) {
+                    ImageView imageView = new ImageView(new Image(new ByteArrayInputStream(resimVerisi)));
+                    imageView.setFitWidth(50);
+                    imageView.setFitHeight(50);
+                    return new SimpleObjectProperty<>(imageView);
+                }
+            }
+            return new SimpleObjectProperty<>(null);
+        });
+
         notlariYukle();
 
-        // Arama alanında metin değiştikçe notları filtrele
         aramaAlani.textProperty().addListener((observable, eskiDeger, yeniDeger) -> notlariFiltrele(yeniDeger));
 
-        // Kolonlara sıralama işlevi ekleme
         baslikKolonu.setSortType(TableColumn.SortType.ASCENDING);
         notTablosu.getSortOrder().add(baslikKolonu);
     }
 
-    void notlariYukle() {
+
+
+
+    public void notlariYukle() {
         notlar.clear();
         notlar.addAll(notDAO.notlariGetir());
     }
@@ -92,7 +119,10 @@ public class AnaArayuzKontrol {
     }
 
     @FXML
-    private void notuKaydet() {
+    private Label bilgilendirmeMesaji;
+
+    @FXML
+    private void notuKaydet() throws IOException {
         String notBaslik = baslik.getText();
         String notIcerik = icerik.getText();
         String notKategori = kategori.getValue();
@@ -101,9 +131,9 @@ public class AnaArayuzKontrol {
         Timestamp hatirlatma = localDate != null ? Timestamp.valueOf(localDate.atStartOfDay()) : null;
 
         // Kullanıcının seçimine göre uygun fabrika kullanılarak not oluşturulması
-        if (notKategori.equals("Metin")) {
+        if (notKategori != null && notKategori.equals("Metin")) {
             notFabrikasi = new MetinNotFabrikasi();
-        } else if (notKategori.equals("Görsel")) {
+        } else if (notKategori != null && notKategori.equals("Görsel")) {
             notFabrikasi = new GorselNotFabrikasi();
         } else {
             // Default olarak metin notu oluştur
@@ -118,39 +148,80 @@ public class AnaArayuzKontrol {
         yeniNot.setEtiketler(notEtiketler);
         yeniNot.setHatirlatmaTarihi(hatirlatma);
 
+        if (yeniNot instanceof GorselNot && yuklenenResim != null) {
+            byte[] resimVerisi = Files.readAllBytes(yuklenenResim.toPath());
+            ((GorselNot) yeniNot).setResim(resimVerisi);
+        }
+
         notDAO.notEkle(yeniNot);
         notlariYukle();
+
+        // Bilgilendirme mesajı gösterme
+        Alert alert = new Alert(AlertType.INFORMATION, "Not kaydedildi!", ButtonType.OK);
+        alert.showAndWait();
+
+        // Giriş alanlarını sıfırlama
+        baslik.clear();
+        icerik.clear();
+        kategori.setValue(null);
+        etiketler.clear();
+        hatirlatmaTarihi.setValue(null);
+        resimGoruntuleyici.setImage(null);
     }
 
+
+
+
+
     @FXML
-    private void notDetaylariniGoster() {
-        if (notTablosu.getSelectionModel().getSelectedItem() != null) {
-            Not secilenNot = notTablosu.getSelectionModel().getSelectedItem();
-
-            if (secilenNot != null) {
-                try {
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/notdefteri/ana/notDetayArayuz.fxml"));
-                    Parent root = fxmlLoader.load();
-
-                    NotDetayArayuzKontrol kontrol = fxmlLoader.getController();
-                    String hatirlatmaTarihi = secilenNot.getHatirlatmaTarihi() != null ? secilenNot.getHatirlatmaTarihi() : "";
-                    kontrol.setDetaylar(secilenNot.getBaslik(), secilenNot.getIcerik(), secilenNot.getKategori(), secilenNot.getEtiketler(), hatirlatmaTarihi);
-                    kontrol.setSecilenNot(secilenNot);
-                    kontrol.setAnaArayuzKontrol(this); // Ana arayüz kontrol sınıfını geçiyoruz
-
-                    Stage stage = new Stage();
-                    stage.setScene(new Scene(root));
-                    stage.setTitle("Not Detayları");
-                    stage.show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+    private void resimYukle() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Resim Dosyaları", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+        Stage stage = (Stage) baslik.getScene().getWindow();
+        yuklenenResim = fileChooser.showOpenDialog(stage);
+        if (yuklenenResim != null) {
+            Image resim = new Image(yuklenenResim.toURI().toString());
+            resimGoruntuleyici.setImage(resim);
         }
     }
 
     @FXML
-    private void notuDuzenle() {
+    private void notDetaylariniGoster() {
+        Not secilenNot = notTablosu.getSelectionModel().getSelectedItem();
+        if (secilenNot != null) {
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/notdefteri/ana/notDetayArayuz.fxml"));
+                Parent root = fxmlLoader.load();
+
+                NotDetayArayuzKontrol kontrol = fxmlLoader.getController();
+                String hatirlatmaTarihi = secilenNot.getHatirlatmaTarihi() != null ? secilenNot.getHatirlatmaTarihi() : "";
+                kontrol.setDetaylar(secilenNot.getBaslik(), secilenNot.getIcerik(), secilenNot.getKategori(), secilenNot.getEtiketler(), hatirlatmaTarihi);
+                kontrol.setSecilenNot(secilenNot);
+                kontrol.setAnaArayuzKontrol(this);
+
+                if (secilenNot instanceof GorselNot) {
+                    byte[] resimVerisi = ((GorselNot) secilenNot).getResim();
+                    if (resimVerisi != null) {
+                        Image resim = new Image(new ByteArrayInputStream(resimVerisi));
+                        kontrol.getResimGoruntuleyici().setImage(resim);
+                    }
+                }
+
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root));
+                stage.setTitle("Not Detayları");
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    @FXML
+    private void notuDuzenle() throws IOException {
         Not secilenNot = notTablosu.getSelectionModel().getSelectedItem();
         if (secilenNot != null) {
             secilenNot.setBaslik(baslik.getText());
@@ -160,10 +231,15 @@ public class AnaArayuzKontrol {
             LocalDate localDate = hatirlatmaTarihi.getValue();
             Timestamp hatirlatma = localDate != null ? Timestamp.valueOf(localDate.atStartOfDay()) : null;
             secilenNot.setHatirlatmaTarihi(hatirlatma);
+
+            if (secilenNot instanceof GorselNot && yuklenenResim != null) {
+                byte[] resimVerisi = Files.readAllBytes(yuklenenResim.toPath());
+                ((GorselNot) secilenNot).setResim(resimVerisi);
+            }
+
             notDAO.notGuncelle(secilenNot);
             notlariYukle();
 
-            // Durum yönetici ile düzenleme durumu set etme
             durumYonetici.setDurum(new DuzenlemeDurumu());
             durumYonetici.isle();
         }
@@ -176,7 +252,6 @@ public class AnaArayuzKontrol {
             notDAO.notSil(secilenNot.getId());
             notlariYukle();
 
-            // Durum yönetici ile görüntüleme durumu set etme
             durumYonetici.setDurum(new GoruntulemeDurumu());
             durumYonetici.isle();
         }
