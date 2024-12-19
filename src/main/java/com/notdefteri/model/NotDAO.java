@@ -1,11 +1,8 @@
 package com.notdefteri.model;
 
 import com.notdefteri.veritabani.VeritabaniBaglantisi;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,13 +90,39 @@ public class NotDAO {
         }
     }
 
-    public void notSil(int id) {
-        String query = "DELETE FROM notlar WHERE id = ?";
-        try (PreparedStatement ps = baglanti.prepareStatement(query)) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
+    public void notSil(Not not) {
+        String sql = "DELETE FROM notlar WHERE id = ?";
+        try (PreparedStatement pstmt = baglanti.prepareStatement(sql)) {
+            pstmt.setInt(1, not.getId());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+
+    public List<Not> tumNotlariGetir() {//not veri tipinde classsa dgore tutuyor
+        List<Not> notlar = new ArrayList<>();
+        String sql = "SELECT * FROM notlar";
+        try (Statement stmt = baglanti.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Not not = new MetinNot(); // veya doğru sınıfı kullanarak nesne oluşturun
+                not.setId(rs.getInt("id"));
+                not.setBaslik(rs.getString("baslik"));
+                not.setIcerik(rs.getString("icerik"));
+                not.setKategori(rs.getString("kategori"));
+                not.setEtiketler(rs.getString("etiketler"));
+                not.setHatirlatmaTarihi(rs.getString("hatirlatmaTarihi"));
+                // Eğer GorselNot kullanıyorsanız, resim verisini de ekleyin
+                if (not instanceof GorselNot) {
+                    ((GorselNot) not).setResim(rs.getBytes("resim"));
+                }
+                notlar.add(not);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return notlar;
+    }
+
 }

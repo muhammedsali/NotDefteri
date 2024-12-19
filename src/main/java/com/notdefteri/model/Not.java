@@ -1,8 +1,12 @@
 package com.notdefteri.model;
 
+import com.notdefteri.state.NotState;
+import com.notdefteri.state.YeniNot;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
 import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 
 public class Not {
     private int id;
@@ -10,8 +14,9 @@ public class Not {
     private StringProperty icerik;
     private StringProperty kategori;
     private StringProperty etiketler;
-    private StringProperty hatirlatmaTarihi;
+    private StringProperty hatirlatmaTarihi; // Time yerine StringProperty kullanıldı
     private String tarih;
+    private NotState state;
 
     public Not() {
         this.baslik = new SimpleStringProperty();
@@ -19,6 +24,7 @@ public class Not {
         this.kategori = new SimpleStringProperty();
         this.etiketler = new SimpleStringProperty();
         this.hatirlatmaTarihi = new SimpleStringProperty();
+        this.state = new YeniNot(); // Varsayılan başlangıç durumu
     }
 
     public int getId() {
@@ -83,10 +89,16 @@ public class Not {
 
     public void setHatirlatmaTarihi(Timestamp hatirlatmaTarihi) {
         if (hatirlatmaTarihi != null) {
-            this.hatirlatmaTarihi.set(hatirlatmaTarihi.toString());
+            // Formatlama yapılarak daha okunabilir hale getirildi
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            this.hatirlatmaTarihi.set(hatirlatmaTarihi.toLocalDateTime().format(formatter));
         } else {
             this.hatirlatmaTarihi.set(null);
         }
+    }
+
+    public void setHatirlatmaTarihi(String hatirlatmaTarihi) {
+        this.hatirlatmaTarihi.set(hatirlatmaTarihi);
     }
 
     public StringProperty hatirlatmaTarihiProperty() {
@@ -100,4 +112,26 @@ public class Not {
     public void setTarih(String tarih) {
         this.tarih = tarih;
     }
+
+    public void setState(NotState state) {
+        this.state = state;
+    }
+
+    public NotState getState() {
+        return state;
+    }
+
+    public void oku() {
+        state.oku(this);
+    }
+
+    public void duzenle(String yeniBaslik, String yeniIcerik) {
+        state.duzenle(this, yeniBaslik, yeniIcerik);
+    }
+
+    public void sil() {
+        state.sil(this);
+    }
+
+
 }

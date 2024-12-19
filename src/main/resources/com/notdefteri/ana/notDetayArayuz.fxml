@@ -3,31 +3,36 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="349.0" prefWidth="382.0" spacing="10" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.notdefteri.arayuz.NotDetayArayuzKontrol">
+<VBox alignment="TOP_CENTER" prefHeight="363.0" prefWidth="536.0" spacing="10" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.notdefteri.arayuz.NotDetayArayuzKontrol">
     <Label text="Not Detayları">
-      <font>
-         <Font size="20.0" />
-      </font></Label>
+        <font>
+            <Font size="20.0" />
+        </font>
+    </Label>
     <GridPane hgap="10" vgap="10">
         <Label text="Başlık" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-        <TextField fx:id="detayBaslik" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-        <Label text="İçerik" GridPane.rowIndex="2" />
-        <TextField fx:id="detayIcerik" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        <Label text="Kategori" GridPane.rowIndex="3" />
-        <TextField fx:id="detayKategori" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-        <Label text="Etiketler" GridPane.rowIndex="4" />
-        <TextField fx:id="detayEtiketler" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-        <Label text="Hatırlatma Tarihi" GridPane.rowIndex="5" />
-        <TextField fx:id="detayHatirlatmaTarihi" prefHeight="26.0" prefWidth="185.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-        <Button onAction="#notuDuzenle" text="Düzenle/Kaydet" GridPane.rowIndex="6" />
-        <Button onAction="#notuSil" text="Sil" GridPane.rowIndex="7" />
+        <TextField fx:id="detayBaslik" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <Label text="İçerik" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <TextField fx:id="detayIcerik" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <Label text="Kategori" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <TextField fx:id="detayKategori" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <Label text="Etiketler" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+        <TextField fx:id="detayEtiketler" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        <Label text="Hatırlatma Tarihi" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+        <TextField fx:id="detayHatirlatmaTarihi" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+        <ImageView fx:id="detayResimGoruntuleyici" fitHeight="65.0" fitWidth="202.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+        <Button onAction="#notuDuzenle" text="Düzenle/Kaydet" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+        <Button onAction="#notuSil" text="Sil" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+       <Button onAction="#detaylariKapat" prefHeight="26.0" prefWidth="118.0" text="Kapat" GridPane.columnIndex="2" GridPane.rowIndex="6" />
       <columnConstraints>
+         <ColumnConstraints />
          <ColumnConstraints />
          <ColumnConstraints />
       </columnConstraints>
@@ -39,8 +44,6 @@
          <RowConstraints />
          <RowConstraints />
          <RowConstraints />
-         <RowConstraints />
       </rowConstraints>
     </GridPane>
-     <Button onAction="#detaylariKapat" text="Kapat" />
 </VBox>

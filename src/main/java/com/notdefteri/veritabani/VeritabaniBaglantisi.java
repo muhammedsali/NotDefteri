@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class VeritabaniBaglantisi {
-    private static VeritabaniBaglantisi ornek;
+    private static VeritabaniBaglantisi ornek;//Instance
     private Connection baglanti;
 
     private VeritabaniBaglantisi() {
